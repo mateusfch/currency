@@ -1,46 +1,59 @@
 services:
-  currency-exchange:
-    build: currency-exchange-service
-    image: exchange
+  - name: naming-server
+    type: web
+    env: docker
+    plan: free
+    dockerfilePath: naming-server/Dockerfile
+    buildCommand: ""
+    startCommand: ""
     ports:
-      - "8000:8000"
-    networks:
-      - currency-network
-    depends_on:
-      - naming-server
-    environment:
-      - eureka.client.serviceUrl.defaultZone=http://naming-server:8761/eureka
+      - 8761
+    healthCheckPath: "/actuator/health"
 
-  currency-conversion:
-    build: currency-conversion-service
-    image: conversion
+  - name: currency-exchange
+    type: web
+    env: docker
+    plan: free
+    dockerfilePath: currency-exchange-service/Dockerfile
+    buildCommand: ""
+    startCommand: ""
     ports:
-      - "8100:8100"
-    networks:
-      - currency-network
-    depends_on:
+      - 8000
+    envVars:
+      - key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+        value: "http://naming-server:8761/eureka"
+    healthCheckPath: "/actuator/health"
+    dependsOn:
       - naming-server
-    environment:
-      - eureka.client.serviceUrl.defaultZone=http://naming-server:8761/eureka
 
-  api-gateway:
-    build: api-gateway
-    image: gateway
+  - name: currency-conversion
+    type: web
+    env: docker
+    plan: free
+    dockerfilePath: currency-conversion-service/Dockerfile
+    buildCommand: ""
+    startCommand: ""
     ports:
-      - "8765:8765"
-    networks:
-      - currency-network
-    depends_on:
+      - 8100
+    envVars:
+      - key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+        value: "http://naming-server:8761/eureka"
+    healthCheckPath: "/actuator/health"
+    dependsOn:
       - naming-server
-    environment:
-      - eureka.client.serviceUrl.defaultZone=http://naming-server:8761/eureka
 
-  naming-server:
-    build: naming-server
-    image: nameserver
+  - name: api-gateway
+    type: web
+    env: docker
+    plan: free
+    dockerfilePath: api-gateway/Dockerfile
+    buildCommand: ""
+    startCommand: ""
     ports:
-      - "8761:8761"
-    networks:
-      - currency-network
-networks:
-  currency-network:
+      - 8765
+    envVars:
+      - key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+        value: "http://naming-server:8761/eureka"
+    healthCheckPath: "/actuator/health"
+    dependsOn:
+      - naming-server
