@@ -40,7 +40,7 @@ spring:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://54.91.112.241:8761/
+      defaultZone: http://naming-server:8761/eureka/
 management:
   endpoints:
     web:
